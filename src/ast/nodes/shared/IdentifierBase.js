@@ -1,0 +1,184 @@
+import { logIllegalImportReassignment } from '../../../utils/logs';
+import { PureFunctionKey } from '../../../utils/pureFunctions';
+import { markModuleAndImpureDependenciesAsExecuted } from '../../../utils/traverseStaticDependencies';
+import { INTERACTION_ACCESSED, INTERACTION_ASSIGNED, INTERACTION_CALLED, NODE_INTERACTION_UNKNOWN_ACCESS } from '../../NodeInteractions';
+import { EMPTY_PATH, UNKNOWN_PATH } from '../../utils/PathTracker';
+import GlobalVariable from '../../variables/GlobalVariable';
+import LocalVariable from '../../variables/LocalVariable';
+import { isFlagSet, setFlag } from './BitFlags';
+import { UNKNOWN_EXPRESSION } from './Expression';
+import { NodeBase } from './Node';
+const tdzVariableKinds = new Set(['class', 'const', 'let', 'var', 'using', 'await using']);
+export default class IdentifierBase extends NodeBase {
+    constructor() {
+        super(...arguments);
+        this.variable = null;
+        this.isVariableReference = false;
+    }
+    get isTDZAccess() {
+        if (!isFlagSet(this.flags, 4 /* Flag.tdzAccessDefined */)) {
+            return null;
+        }
+        return isFlagSet(this.flags, 8 /* Flag.tdzAccess */);
+    }
+    set isTDZAccess(value) {
+        this.flags = setFlag(this.flags, 4 /* Flag.tdzAccessDefined */, true);
+        this.flags = setFlag(this.flags, 8 /* Flag.tdzAccess */, value);
+    }
+    deoptimizeArgumentsOnInteractionAtPath(interaction, path, recursionTracker) {
+        this.variable.deoptimizeArgumentsOnInteractionAtPath(interaction, path, recursionTracker);
+    }
+    deoptimizePath(path) {
+        if (path.length === 0 && !this.scope.contains(this.name)) {
+            this.disallowImportReassignment();
+        }
+        // We keep conditional chaining because an unknown Node could have an
+        // Identifier as property that might be deoptimized by default
+        this.variable?.deoptimizePath(path);
+    }
+    getLiteralValueAtPath(path, recursionTracker, origin) {
+        return this.getVariableRespectingTDZ().getLiteralValueAtPath(path, recursionTracker, origin);
+    }
+    getReturnExpressionWhenCalledAtPath(path, interaction, recursionTracker, origin) {
+        const [expression, isPure] = this.getVariableRespectingTDZ().getReturnExpressionWhenCalledAtPath(path, interaction, recursionTracker, origin);
+        return [expression, isPure || this.isPureFunction(path)];
+    }
+    hasEffects(context) {
+        if (!this.deoptimized)
+            this.applyDeoptimizations();
+        if (this.isPossibleTDZ() && this.variable.kind !== 'var') {
+            return true;
+        }
+        return (this.scope.context.options.treeshake
+            .unknownGlobalSideEffects &&
+            this.variable instanceof GlobalVariable &&
+            !this.isPureFunction(EMPTY_PATH) &&
+            this.variable.hasEffectsOnInteractionAtPath(EMPTY_PATH, NODE_INTERACTION_UNKNOWN_ACCESS, context));
+    }
+    hasEffectsOnInteractionAtPath(path, interaction, context) {
+        switch (interaction.type) {
+            case INTERACTION_ACCESSED: {
+                return (this.variable !== null &&
+                    !this.isPureFunction(path) &&
+                    this.getVariableRespectingTDZ().hasEffectsOnInteractionAtPath(path, interaction, context));
+            }
+            case INTERACTION_ASSIGNED: {
+                return (path.length > 0 ? this.getVariableRespectingTDZ() : this.variable).hasEffectsOnInteractionAtPath(path, interaction, context);
+            }
+            case INTERACTION_CALLED: {
+                return (!this.isPureFunction(path) &&
+                    this.getVariableRespectingTDZ().hasEffectsOnInteractionAtPath(path, interaction, context));
+            }
+        }
+    }
+    include(context, includeChildrenRecursively) {
+        if (!this.included)
+            this.includeNode(context);
+        if (includeChildrenRecursively) {
+            this.variable?.includePath(UNKNOWN_PATH, context);
+        }
+    }
+    includeNode(context) {
+        this.included = true;
+        if (!this.deoptimized)
+            this.applyDeoptimizations();
+        if (this.variable !== null) {
+            this.scope.context.includeVariableInModule(this.variable, EMPTY_PATH, context);
+        }
+    }
+    includePath(path, context) {
+        if (!this.included) {
+            this.included = true;
+            if (!this.deoptimized)
+                this.applyDeoptimizations();
+            if (this.variable !== null) {
+                this.scope.context.includeVariableInModule(this.variable, path, context);
+            }
+        }
+        else if (path.length > 0) {
+            this.variable?.includePath(path, context);
+        }
+    }
+    includeCallArguments(interaction, context) {
+        this.variable.includeCallArguments(interaction, context);
+    }
+    isPossibleTDZ() {
+        // return cached value to avoid issues with the next tree-shaking pass
+        const cachedTdzAccess = this.isTDZAccess;
+        if (cachedTdzAccess !== null)
+            return cachedTdzAccess;
+        if (!(this.variable instanceof LocalVariable &&
+            this.variable.kind &&
+            tdzVariableKinds.has(this.variable.kind) &&
+            // We ignore modules that did not receive a treeshaking pass yet as that
+            // causes many false positives due to circular dependencies or disabled
+            // moduleSideEffects.
+            this.variable.module.hasTreeShakingPassStarted)) {
+            return (this.isTDZAccess = false);
+        }
+        let decl_id;
+        if (this.variable.declarations &&
+            this.variable.declarations.length === 1 &&
+            (decl_id = this.variable.declarations[0]) &&
+            this.start < decl_id.start &&
+            closestParentFunctionOrProgram(this) === closestParentFunctionOrProgram(decl_id)) {
+            // a variable accessed before its declaration
+            // in the same function or at top level of module
+            return (this.isTDZAccess = true);
+        }
+        if (!this.variable.initReached) {
+            // Either a const/let TDZ violation or
+            // var use before declaration was encountered.
+            return (this.isTDZAccess = true);
+        }
+        return (this.isTDZAccess = false);
+    }
+    applyDeoptimizations() {
+        this.deoptimized = true;
+        if (this.variable instanceof LocalVariable) {
+            // When accessing a variable from a module without side effects, this
+            // means we use an export of that module and therefore need to potentially
+            // include it in the bundle.
+            if (!this.variable.module.isExecuted) {
+                markModuleAndImpureDependenciesAsExecuted(this.variable.module);
+            }
+            this.variable.consolidateInitializers();
+            this.scope.context.requestTreeshakingPass();
+        }
+        if (this.isVariableReference) {
+            this.variable.addUsedPlace(this);
+            this.scope.context.requestTreeshakingPass();
+        }
+    }
+    disallowImportReassignment() {
+        return this.scope.context.error(logIllegalImportReassignment(this.name, this.scope.context.module.id), this.start);
+    }
+    getVariableRespectingTDZ() {
+        if (this.isPossibleTDZ()) {
+            return UNKNOWN_EXPRESSION;
+        }
+        return this.variable;
+    }
+    isPureFunction(path) {
+        let currentPureFunction = this.scope.context.manualPureFunctions[this.name];
+        for (const segment of path) {
+            if (currentPureFunction) {
+                if (currentPureFunction[PureFunctionKey]) {
+                    return true;
+                }
+                currentPureFunction = currentPureFunction[segment];
+            }
+            else {
+                return false;
+            }
+        }
+        return currentPureFunction?.[PureFunctionKey];
+    }
+}
+function closestParentFunctionOrProgram(node) {
+    while (node && !/^Program|Function/.test(node.type)) {
+        node = node.parent;
+    }
+    // one of: ArrowFunctionExpression, FunctionDeclaration, FunctionExpression or Program
+    return node;
+}

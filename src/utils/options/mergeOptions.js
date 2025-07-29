@@ -1,0 +1,191 @@
+import { ensureArray } from '../ensureArray';
+import { getLogger } from '../logger';
+import { LOGLEVEL_INFO } from '../logging';
+import { URL_JSX, URL_OUTPUT_GENERATEDCODE, URL_TREESHAKE } from '../urls';
+import { generatedCodePresets, getOnLog, jsxPresets, normalizePluginOption, objectifyOption, objectifyOptionWithPresets, treeshakePresets, warnUnknownOptions } from './options';
+export const commandAliases = {
+    c: 'config',
+    d: 'dir',
+    e: 'external',
+    f: 'format',
+    g: 'globals',
+    h: 'help',
+    i: 'input',
+    m: 'sourcemap',
+    n: 'name',
+    o: 'file',
+    p: 'plugin',
+    v: 'version',
+    w: 'watch'
+};
+const EMPTY_COMMAND_OPTIONS = { external: [], globals: undefined };
+export async function mergeOptions(config, watchMode, rawCommandOptions = EMPTY_COMMAND_OPTIONS, printLog) {
+    const command = getCommandOptions(rawCommandOptions);
+    const plugins = await normalizePluginOption(config.plugins);
+    const logLevel = config.logLevel || LOGLEVEL_INFO;
+    const onLog = getOnLog(config, logLevel, printLog);
+    const log = getLogger(plugins, onLog, watchMode, logLevel);
+    const inputOptions = mergeInputOptions(config, command, plugins, log, onLog);
+    if (command.output) {
+        Object.assign(command, command.output);
+    }
+    const outputOptionsArray = ensureArray(config.output);
+    if (outputOptionsArray.length === 0)
+        outputOptionsArray.push({});
+    const outputOptions = await Promise.all(outputOptionsArray.map(singleOutputOptions => mergeOutputOptions(singleOutputOptions, command, log)));
+    warnUnknownOptions(command, [
+        ...Object.keys(inputOptions).filter(option => option !== 'fs'),
+        ...Object.keys(outputOptions[0]).filter(option => option !== 'sourcemapIgnoreList' && option !== 'sourcemapPathTransform'),
+        ...Object.keys(commandAliases),
+        'bundleConfigAsCjs',
+        'config',
+        'configImportAttributesKey',
+        'configPlugin',
+        'environment',
+        'failAfterWarnings',
+        'filterLogs',
+        'forceExit',
+        'plugin',
+        'silent',
+        'stdin',
+        'waitForBundleInput'
+    ], 'CLI flags', log, /^_$|output$|config/);
+    inputOptions.output = outputOptions;
+    return inputOptions;
+}
+function getCommandOptions(rawCommandOptions) {
+    const external = rawCommandOptions.external && typeof rawCommandOptions.external === 'string'
+        ? rawCommandOptions.external.split(',')
+        : [];
+    return {
+        ...rawCommandOptions,
+        external,
+        globals: typeof rawCommandOptions.globals === 'string'
+            ? rawCommandOptions.globals.split(',').reduce((globals, globalDefinition) => {
+                const [id, variableName] = globalDefinition.split(':');
+                globals[id] = variableName;
+                if (!external.includes(id)) {
+                    external.push(id);
+                }
+                return globals;
+            }, Object.create(null))
+            : undefined
+    };
+}
+function mergeInputOptions(config, overrides, plugins, log, onLog) {
+    const getOption = (name) => overrides[name] ?? config[name];
+    const inputOptions = {
+        cache: config.cache,
+        context: getOption('context'),
+        experimentalCacheExpiry: getOption('experimentalCacheExpiry'),
+        experimentalLogSideEffects: getOption('experimentalLogSideEffects'),
+        external: getExternal(config, overrides),
+        fs: getOption('fs'),
+        input: getOption('input') || [],
+        jsx: getObjectOption(config, overrides, 'jsx', objectifyOptionWithPresets(jsxPresets, 'jsx', URL_JSX, 'false, ')),
+        logLevel: getOption('logLevel'),
+        makeAbsoluteExternalsRelative: getOption('makeAbsoluteExternalsRelative'),
+        maxParallelFileOps: getOption('maxParallelFileOps'),
+        moduleContext: getOption('moduleContext'),
+        onLog,
+        onwarn: undefined,
+        perf: getOption('perf'),
+        plugins,
+        preserveEntrySignatures: getOption('preserveEntrySignatures'),
+        preserveSymlinks: getOption('preserveSymlinks'),
+        shimMissingExports: getOption('shimMissingExports'),
+        strictDeprecations: getOption('strictDeprecations'),
+        treeshake: getObjectOption(config, overrides, 'treeshake', objectifyOptionWithPresets(treeshakePresets, 'treeshake', URL_TREESHAKE, 'false, true, ')),
+        watch: getWatch(config, overrides)
+    };
+    warnUnknownOptions(config, Object.keys(inputOptions), 'input options', log, /^output$/);
+    return inputOptions;
+}
+const getExternal = (config, overrides) => {
+    const configExternal = config.external;
+    return typeof configExternal === 'function'
+        ? (source, importer, isResolved) => configExternal(source, importer, isResolved) || overrides.external.includes(source)
+        : [...ensureArray(configExternal), ...overrides.external];
+};
+const getObjectOption = (config, overrides, name, objectifyValue = objectifyOption) => {
+    const commandOption = normalizeObjectOptionValue(overrides[name], objectifyValue);
+    const configOption = normalizeObjectOptionValue(config[name], objectifyValue);
+    if (commandOption !== undefined) {
+        return commandOption && { ...configOption, ...commandOption };
+    }
+    return configOption;
+};
+export const getWatch = (config, overrides) => config.watch !== false && getObjectOption(config, overrides, 'watch');
+export const isWatchEnabled = (optionValue) => {
+    if (Array.isArray(optionValue)) {
+        return optionValue.reduce((result, value) => (typeof value === 'boolean' ? value : result), false);
+    }
+    return optionValue === true;
+};
+export const normalizeObjectOptionValue = (optionValue, objectifyValue) => {
+    if (!optionValue) {
+        return optionValue;
+    }
+    if (Array.isArray(optionValue)) {
+        return optionValue.reduce((result, value) => value && result && { ...result, ...objectifyValue(value) }, {});
+    }
+    return objectifyValue(optionValue);
+};
+async function mergeOutputOptions(config, overrides, log) {
+    const getOption = (name) => overrides[name] ?? config[name];
+    const outputOptions = {
+        amd: getObjectOption(config, overrides, 'amd'),
+        assetFileNames: getOption('assetFileNames'),
+        banner: getOption('banner'),
+        chunkFileNames: getOption('chunkFileNames'),
+        compact: getOption('compact'),
+        dir: getOption('dir'),
+        dynamicImportInCjs: getOption('dynamicImportInCjs'),
+        entryFileNames: getOption('entryFileNames'),
+        esModule: getOption('esModule'),
+        experimentalMinChunkSize: getOption('experimentalMinChunkSize'),
+        exports: getOption('exports'),
+        extend: getOption('extend'),
+        externalImportAssertions: getOption('externalImportAssertions'),
+        externalImportAttributes: getOption('externalImportAttributes'),
+        externalLiveBindings: getOption('externalLiveBindings'),
+        file: getOption('file'),
+        footer: getOption('footer'),
+        format: getOption('format'),
+        freeze: getOption('freeze'),
+        generatedCode: getObjectOption(config, overrides, 'generatedCode', objectifyOptionWithPresets(generatedCodePresets, 'output.generatedCode', URL_OUTPUT_GENERATEDCODE, '')),
+        globals: getOption('globals'),
+        hashCharacters: getOption('hashCharacters'),
+        hoistTransitiveImports: getOption('hoistTransitiveImports'),
+        importAttributesKey: getOption('importAttributesKey'),
+        indent: getOption('indent'),
+        inlineDynamicImports: getOption('inlineDynamicImports'),
+        interop: getOption('interop'),
+        intro: getOption('intro'),
+        manualChunks: getOption('manualChunks'),
+        minifyInternalExports: getOption('minifyInternalExports'),
+        name: getOption('name'),
+        noConflict: getOption('noConflict'),
+        outro: getOption('outro'),
+        paths: getOption('paths'),
+        plugins: await normalizePluginOption(config.plugins),
+        preserveModules: getOption('preserveModules'),
+        preserveModulesRoot: getOption('preserveModulesRoot'),
+        reexportProtoFromExternal: getOption('reexportProtoFromExternal'),
+        sanitizeFileName: getOption('sanitizeFileName'),
+        sourcemap: getOption('sourcemap'),
+        sourcemapBaseUrl: getOption('sourcemapBaseUrl'),
+        sourcemapDebugIds: getOption('sourcemapDebugIds'),
+        sourcemapExcludeSources: getOption('sourcemapExcludeSources'),
+        sourcemapFile: getOption('sourcemapFile'),
+        sourcemapFileNames: getOption('sourcemapFileNames'),
+        sourcemapIgnoreList: getOption('sourcemapIgnoreList'),
+        sourcemapPathTransform: getOption('sourcemapPathTransform'),
+        strict: getOption('strict'),
+        systemNullSetters: getOption('systemNullSetters'),
+        validate: getOption('validate'),
+        virtualDirname: getOption('virtualDirname')
+    };
+    warnUnknownOptions(config, Object.keys(outputOptions), 'output options', log);
+    return outputOptions;
+}
