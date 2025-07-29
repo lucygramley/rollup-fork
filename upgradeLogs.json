@@ -1,0 +1,60 @@
+{
+  "packagesUpgraded": [
+    "@eslint/js (^9.31.0 → ^9.32.0)",
+    "@inquirer/prompts (^7.7.1 → ^7.8.0)",
+    "@types/node (^20.19.9 → ^24.1.0)",
+    "vite (^7.0.5 → ^7.0.6)",
+    "@mermaid-js/mermaid-cli (^11.6.0 → ^11.9.0)",
+    "@napi-rs/cli (^3.0.1 → ^3.0.4)",
+    "@vue/language-server (^3.0.3 → ^3.0.4)",
+    "eslint (^9.31.0 → ^9.32.0)",
+    "rollup (^4.45.1 → ^4.46.2)",
+    "vue-tsc (^2.2.12 → ^3.0.4)",
+    "@types/picomatch (^4.0.1 → ^4.0.2)",
+    "chokidar (^3.6.0 → ^4.0.3)",
+    "core-js (3.38.1 → 3.44.0)",
+    "cross-env (^7.0.3 → ^10.0.0)",
+    "memfs (^4.17.2 → ^4.23.0)",
+    "source-map (^0.7.4 → ^0.7.6)",
+    "yargs-parser (^21.1.1 → ^22.0.0)"
+  ],
+  "errorsEncountered": [
+    {
+      "description": "75 baseline TypeScript compilation errors found during initial build",
+      "resolution": "Tool proceeded with upgrades despite baseline errors, monitoring for new errors after each package group update"
+    }
+  ],
+  "errorsLeftUnresolved": [
+    {
+      "description": "75 pre-existing TypeScript compilation errors",
+      "details": "These were baseline errors present before any package updates began. The tool successfully avoided introducing any new errors during the upgrade process."
+    }
+  ],
+  "aiUsage": {
+    "wasUsed": false,
+    "details": "No AI was utilized during this upgrade process",
+    "tokenUsage": {
+      "totalApiCalls": 0,
+      "totalTokens": 0,
+      "promptTokens": 0,
+      "completionTokens": 0
+    },
+    "reason": "All 17 package upgrades were completed successfully without requiring AI assistance for conflict resolution or error fixing"
+  },
+  "overallSummary": {
+    "executionTime": "00:10:38",
+    "totalPackagesUpdated": 17,
+    "successRate": "100%",
+    "strategy": "Packages were updated in 12 strategic groups to minimize dependency conflicts. Each group was validated for new TypeScript errors before proceeding to the next group.",
+    "keyOutcomes": [
+      "All 17 available package updates were successfully applied",
+      "No new compilation errors were introduced during the upgrade process",
+      "Package updates included major version bumps for several packages (cross-env 7→10, vue-tsc 2→3, @types/node 20→24, chokidar 3→4)",
+      "The upgrade process was fully automated without requiring manual intervention or AI assistance"
+    ],
+    "modifiedFiles": [
+      "package.json",
+      "package-lock.json"
+    ]
+  }
+}
