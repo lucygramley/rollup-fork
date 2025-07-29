@@ -1,0 +1,146 @@
+[2025-07-29 15:11:09.916] Changing working directory from C:\Users\lucygramley to c:\Users\lucygramley\Downloads\ai_test_repos\rollup-fork
+[2025-07-29 15:11:17.005] Updating 17 packages at c:\Users\lucygramley\Downloads\ai_test_repos\rollup-fork
+[2025-07-29 15:11:23.638] Analyzing project at: c:\Users\lucygramley\Downloads\ai_test_repos\rollup-fork
+[2025-07-29 15:11:23.639] Analyzing repository structure...
+[2025-07-29 15:11:24.542] No monorepo structure detected
+[2025-07-29 15:11:24.544] Generating installation commands...
+[2025-07-29 15:11:41.828] Found 38 package installation tasks
+[2025-07-29 15:11:41.835] Installing packages...
+[2025-07-29 15:12:10.467] Looking for local TypeScript installation...
+[2025-07-29 15:12:10.471] Using local TypeScript compiler at: c:\Users\lucygramley\Downloads\ai_test_repos\rollup-fork\node_modules\typescript\lib\tsc.js
+[2025-07-29 15:12:10.473] Building project to collect baseline errors...
+[2025-07-29 15:13:38.055] Found 75 errors in initial build
+[2025-07-29 15:15:19.528] Updating packages in the following order:
+ @eslint/js, @inquirer/prompts @types/node vite, @mermaid-js/mermaid-cli, @napi-rs/cli, @vue/language-server eslint rollup vue-tsc, @types/picomatch, chokidar, core-js, cross-env, memfs, source-map, yargs-parser
+[2025-07-29 15:15:19.702] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:15:19.721] Updating package group (1/12): @eslint/js
+[2025-07-29 15:15:24.686] Updating @eslint/js from ^9.31.0 to ^9.32.0
+[2025-07-29 15:15:41.835] No new errors found after updating @eslint/js.
+[2025-07-29 15:15:41.837] Modified files while updating package(s) @eslint/js: 
+package.json
+package-lock.json
+[2025-07-29 15:15:41.841] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:15:41.845] Package group @eslint/js completed in 00:00:22.
+Successfully upgraded 1 packages: @eslint/js
+[2025-07-29 15:15:41.850] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:15:41.852] Updating package group (2/12): @inquirer/prompts @types/node vite
+[2025-07-29 15:15:47.101] Updating @inquirer/prompts from ^7.7.1 to ^7.8.0, @types/node from ^20.19.9 to ^24.1.0, vite from ^7.0.5 to ^7.0.6
+[2025-07-29 15:16:07.717] No new errors found after updating @inquirer/prompts @types/node vite.
+[2025-07-29 15:16:07.719] Modified files while updating package(s) @inquirer/prompts @types/node vite: 
+package.json
+package-lock.json
+[2025-07-29 15:16:07.721] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:16:07.724] Package group @inquirer/prompts @types/node vite completed in 00:00:25.
+Successfully upgraded 3 packages: @inquirer/prompts,@types/node,vite
+[2025-07-29 15:16:07.728] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:16:07.729] Updating package group (3/12): @mermaid-js/mermaid-cli
+[2025-07-29 15:16:13.761] Updating @mermaid-js/mermaid-cli from ^11.6.0 to ^11.9.0
+[2025-07-29 15:16:32.370] No new errors found after updating @mermaid-js/mermaid-cli.
+[2025-07-29 15:16:32.372] Modified files while updating package(s) @mermaid-js/mermaid-cli: 
+package.json
+package-lock.json
+[2025-07-29 15:16:32.374] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:16:32.376] Package group @mermaid-js/mermaid-cli completed in 00:00:24.
+Successfully upgraded 1 packages: @mermaid-js/mermaid-cli
+[2025-07-29 15:16:32.378] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:16:32.381] Updating package group (4/12): @napi-rs/cli
+[2025-07-29 15:16:38.218] Updating @napi-rs/cli from ^3.0.1 to ^3.0.4
+[2025-07-29 15:16:58.046] No new errors found after updating @napi-rs/cli.
+[2025-07-29 15:16:58.048] Modified files while updating package(s) @napi-rs/cli: 
+package.json
+package-lock.json
+[2025-07-29 15:16:58.052] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:16:58.054] Package group @napi-rs/cli completed in 00:00:25.
+Successfully upgraded 1 packages: @napi-rs/cli
+[2025-07-29 15:16:58.056] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:16:58.058] Updating package group (5/12): @vue/language-server eslint rollup vue-tsc
+[2025-07-29 15:17:04.102] Updating @vue/language-server from ^3.0.3 to ^3.0.4, eslint from ^9.31.0 to ^9.32.0, rollup from ^4.45.1 to ^4.46.2, vue-tsc from ^2.2.12 to ^3.0.4
+[2025-07-29 15:18:20.013] No new errors found after updating @vue/language-server eslint rollup vue-tsc.
+[2025-07-29 15:18:20.015] Modified files while updating package(s) @vue/language-server eslint rollup vue-tsc: 
+package.json
+package-lock.json
+[2025-07-29 15:18:20.018] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:18:20.019] Package group @vue/language-server eslint rollup vue-tsc completed in 00:01:21.
+Successfully upgraded 4 packages: @vue/language-server,eslint,rollup,vue-tsc
+[2025-07-29 15:18:20.021] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:18:20.023] Updating package group (6/12): @types/picomatch
+[2025-07-29 15:19:00.182] Updating @types/picomatch from ^4.0.1 to ^4.0.2
+[2025-07-29 15:19:21.167] No new errors found after updating @types/picomatch.
+[2025-07-29 15:19:21.170] Modified files while updating package(s) @types/picomatch: 
+package.json
+package-lock.json
+[2025-07-29 15:19:21.171] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:19:21.173] Package group @types/picomatch completed in 00:01:01.
+Successfully upgraded 1 packages: @types/picomatch
+[2025-07-29 15:19:21.177] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:19:21.179] Updating package group (7/12): chokidar
+[2025-07-29 15:19:26.913] Updating chokidar from ^3.6.0 to ^4.0.3
+[2025-07-29 15:19:44.601] No new errors found after updating chokidar.
+[2025-07-29 15:19:44.603] Modified files while updating package(s) chokidar: 
+package.json
+package-lock.json
+[2025-07-29 15:19:44.605] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:19:44.606] Package group chokidar completed in 00:00:23.
+Successfully upgraded 1 packages: chokidar
+[2025-07-29 15:19:44.608] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:19:44.609] Updating package group (8/12): core-js
+[2025-07-29 15:19:53.893] Updating core-js from 3.38.1 to 3.44.0
+[2025-07-29 15:20:12.748] No new errors found after updating core-js.
+[2025-07-29 15:20:12.750] Modified files while updating package(s) core-js: 
+package.json
+package-lock.json
+[2025-07-29 15:20:12.751] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:20:12.754] Package group core-js completed in 00:00:28.
+Successfully upgraded 1 packages: core-js
+[2025-07-29 15:20:12.755] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:20:12.758] Updating package group (9/12): cross-env
+[2025-07-29 15:20:17.777] Updating cross-env from ^7.0.3 to ^10.0.0
+[2025-07-29 15:20:36.374] No new errors found after updating cross-env.
+[2025-07-29 15:20:36.377] Modified files while updating package(s) cross-env: 
+package.json
+package-lock.json
+[2025-07-29 15:20:36.379] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:20:36.381] Package group cross-env completed in 00:00:23.
+Successfully upgraded 1 packages: cross-env
+[2025-07-29 15:20:36.382] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:20:36.384] Updating package group (10/12): memfs
+[2025-07-29 15:20:41.867] Updating memfs from ^4.17.2 to ^4.23.0
+[2025-07-29 15:21:00.544] No new errors found after updating memfs.
+[2025-07-29 15:21:00.546] Modified files while updating package(s) memfs: 
+package.json
+package-lock.json
+[2025-07-29 15:21:00.548] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:21:00.553] Package group memfs completed in 00:00:24.
+Successfully upgraded 1 packages: memfs
+[2025-07-29 15:21:00.556] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:21:00.557] Updating package group (11/12): source-map
+[2025-07-29 15:21:05.331] Updating source-map from ^0.7.4 to ^0.7.6
+[2025-07-29 15:21:24.473] No new errors found after updating source-map.
+[2025-07-29 15:21:24.477] Modified files while updating package(s) source-map: 
+package.json
+package-lock.json
+[2025-07-29 15:21:24.481] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:21:24.484] Package group source-map completed in 00:00:23.
+Successfully upgraded 1 packages: source-map
+[2025-07-29 15:21:24.486] Using VS Code provided token for Kusto authentication
+[2025-07-29 15:21:24.490] Updating package group (12/12): yargs-parser
+[2025-07-29 15:21:29.718] Updating yargs-parser from ^21.1.1 to ^22.0.0
+[2025-07-29 15:21:47.953] No new errors found after updating yargs-parser.
+[2025-07-29 15:21:47.956] Modified files while updating package(s) yargs-parser: 
+package.json
+package-lock.json
+[2025-07-29 15:21:47.959] Deleted temp directory for PackageUpdater.
+[2025-07-29 15:21:47.961] Package group yargs-parser completed in 00:00:23.
+Successfully upgraded 1 packages: yargs-parser
+[2025-07-29 15:21:47.963] All packages updated.
+[2025-07-29 15:21:47.966] Updater completed in 00:10:38.
+Successfully upgraded 17 packages.
+Partially upgraded 0 packages.
+Unable to upgrade 0 packages.
+Total packages available for upgrade: 17
+[2025-07-29 15:21:47.969] === Token Usage Summary ===
+Total API Calls: 0
+Total Tokens: 0 (Prompt: 0, Completion: 0)
+Usage by Model:
+
+[2025-07-29 15:21:47.971] Report written to c:\Users\lucygramley\.vscode-insiders\extensions\emilyfischer.jsts-upgrade-extension-0.0.1\dist\updates\logs\rollup-fork_2025-07-29_15-11-09.txt
